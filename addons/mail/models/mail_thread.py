@@ -377,26 +377,24 @@ class MailThread(models.AbstractModel):
             email_link = "<a href='mailto:%(email)s'>%(email)s</a>" % {'email': alias.display_name}
             if nothing_here:
                 return "<p class='o_view_nocontent_smiling_face'>%(dyn_help)s</p>" % {
-                    'dyn_help': _("Add a new %(document)s or send an email to %(email_link)s") % {
-                        'document': document_name,
-                        'email_link': email_link
-                    }
+                    'dyn_help': _("Add a new %(document)s or send an email to %(email_link)s",
+                        document=document_name,
+                        email_link=email_link,
+                    )
                 }
             # do not add alias two times if it was added previously
             if "oe_view_nocontent_alias" not in help:
                 return "%(static_help)s<p class='oe_view_nocontent_alias'>%(dyn_help)s</p>" % {
                     'static_help': help,
-                    'dyn_help': _("Create new %(document)s by sending an email to %(email_link)s") %  {
-                        'document': document_name,
-                        'email_link': email_link,
-                    }
+                    'dyn_help': _("Create new %(document)s by sending an email to %(email_link)s",
+                        document=document_name,
+                        email_link=email_link,
+                    )
                 }
 
         if nothing_here:
             return "<p class='o_view_nocontent_smiling_face'>%(dyn_help)s</p>" % {
-                'dyn_help': _("Create new %(document)s") % {
-                    'document': document_name,
-                }
+                'dyn_help': _("Create new %(document)s", document=document_name),
             }
 
         return help
@@ -899,7 +897,11 @@ class MailThread(models.AbstractModel):
 
         # compute references to find if message is a reply to an existing thread
         thread_references = message_dict['references'] or message_dict['in_reply_to']
-        msg_references = [ref for ref in tools.mail_header_msgid_re.findall(thread_references) if 'reply_to' not in ref]
+        msg_references = [
+            re.sub(r'[\r\n\t ]+', r'', ref)  # "Unfold" buggy references
+            for ref in tools.mail_header_msgid_re.findall(thread_references)
+            if 'reply_to' not in ref
+        ]
         mail_messages = self.env['mail.message'].sudo().search([('message_id', 'in', msg_references)], limit=1, order='id desc, message_id')
         is_a_reply = bool(mail_messages)
         reply_model, reply_thread_id = mail_messages.model, mail_messages.res_id
@@ -1832,7 +1834,7 @@ class MailThread(models.AbstractModel):
         if subtype_xmlid:
             subtype_id = self.env['ir.model.data'].xmlid_to_res_id(subtype_xmlid)
         if not subtype_id:
-            subtype_id = self.env['ir.model.data'].xmlid_to_res_id('mail_mt_note')
+            subtype_id = self.env['ir.model.data'].xmlid_to_res_id('mail.mt_note')
 
         # automatically subscribe recipients if asked to
         if self._context.get('mail_post_autofollow') and partner_ids:
@@ -2600,6 +2602,8 @@ class MailThread(models.AbstractModel):
 
         # fill group_data with default_values if they are not complete
         for group_name, group_func, group_data in groups:
+            group_data.setdefault('notification_group_name', group_name)
+            group_data.setdefault('notification_is_customer', False)
             group_data.setdefault('has_button_access', True)
             group_button_access = group_data.setdefault('button_access', {})
             group_button_access.setdefault('url', access_link)
@@ -2664,9 +2668,9 @@ class MailThread(models.AbstractModel):
             self.check_access_rights('write')
             self.check_access_rule('write')
 
-        # filter inactive
+        # filter inactive and private addresses
         if partner_ids and not adding_current:
-            partner_ids = self.env['res.partner'].sudo().search([('id', 'in', partner_ids), ('active', '=', True)]).ids
+            partner_ids = self.env['res.partner'].sudo().search([('id', 'in', partner_ids), ('active', '=', True), ('type', '!=', 'private')]).ids
 
         return self._message_subscribe(partner_ids, channel_ids, subtype_ids, customer_ids=customer_ids)
 

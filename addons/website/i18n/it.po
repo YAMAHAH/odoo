@@ -409,12 +409,8 @@ msgstr "<b>Fai clic</b> sull'intestazione per configurarla."
 #. openerp-web
 #: code:addons/website/static/src/js/tours/tour_utils.js:0
 #, python-format
-msgid ""
-"<b>Click</b> on this option to change the ${optionTooltipLabel} of the "
-"block."
-msgstr ""
-"<b>Fai clic</b> sull'opzione per cambiare la ${optionTooltipLabel} del "
-"blocco."
+msgid "<b>Click</b> on this option to change the %s of the block."
+msgstr "<b>Fai clic</b> sull'opzione per cambiare la %s del blocco."
 
 #. module: website
 #. openerp-web
@@ -473,8 +469,8 @@ msgstr ""
 #. openerp-web
 #: code:addons/website/static/src/js/tours/tour_utils.js:0
 #, python-format
-msgid "<b>Select</b> a ${optionTooltipLabel}."
-msgstr "<b>Seleziona</b> una ${optionTooltipLabel}."
+msgid "<b>Select</b> a %s."
+msgstr ""
 
 #. module: website
 #. openerp-web
@@ -487,8 +483,8 @@ msgstr "<b>Seleziona</b> una tavolozza colori."
 #. openerp-web
 #: code:addons/website/static/src/js/tours/tour_utils.js:0
 #, python-format
-msgid "<b>Slide</b> this button to change the ${direction} padding"
-msgstr ""
+msgid "<b>Slide</b> this button to change the %s padding"
+msgstr "<b>Fai scorrere</b> il pulsante per cambiare il padding %s"
 
 #. module: website
 #. openerp-web
@@ -1441,7 +1437,7 @@ msgstr "Pagine meravigliose"
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.qweb_500
 msgid "An error occured while rendering the template"
-msgstr "Si è verificato un errore durante l'interpretazione del modello."
+msgstr "Si è verificato un errore durante la rappresentazione del modello."
 
 #. module: website
 #: model:ir.actions.client,name:website.backend_dashboard
@@ -1783,6 +1779,20 @@ msgstr "Percorso di navigazione"
 #: model_terms:ir.ui.view,arch_db:website.s_table_of_content
 msgid "Building blocks system"
 msgstr "Sistema a componenti"
+
+#. module: website
+#. openerp-web
+#: code:addons/website/static/src/js/menu/new_content.js:0
+#, python-format
+msgid "Building your %s"
+msgstr ""
+
+#. module: website
+#. openerp-web
+#: code:addons/website/static/src/xml/theme_preview.xml:0
+#, python-format
+msgid "Building your website..."
+msgstr ""
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.bs_debug_view
@@ -2442,7 +2452,7 @@ msgstr "Proprietà copertina"
 #. module: website
 #: model:ir.model,name:website.model_website_cover_properties_mixin
 msgid "Cover Properties Website Mixin"
-msgstr ""
+msgstr "Mixin sito web per proprietà copertina"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.page_404
@@ -3062,9 +3072,8 @@ msgstr "Trascina un altro blocco nella pagina, sotto la copertina."
 #: code:addons/website/static/src/js/tours/tour_utils.js:0
 #, python-format
 msgid ""
-"Drag the <b>${snippet.name}</b> building block and drop it in your page."
-msgstr ""
-"Trascina il componente <b>${snippet.name}</b> e rilascialo nella pagina."
+"Drag the <b>%s</b> building block and drop it at the bottom of your page."
+msgstr "Trascina il componente <b>%s</b> e rilascialo in fondo alla pagina."
 
 #. module: website
 #. openerp-web
@@ -5324,7 +5333,7 @@ msgstr "Mixin siti web multipli"
 #. module: website
 #: model:ir.model,name:website.model_website_published_multi_mixin
 msgid "Multi Website Published Mixin"
-msgstr "Mixin siti web multipli pubblicati "
+msgstr "Mixin siti web multipli pubblicati"
 
 #. module: website
 #: model:ir.model.fields,field_description:website.field_res_config_settings__group_multi_website
@@ -5854,7 +5863,7 @@ msgstr "Menù superiore"
 #. module: website
 #: model:ir.model.fields,field_description:website.field_website_menu__parent_path
 msgid "Parent Path"
-msgstr "Percorso padre"
+msgstr "Percorso primario"
 
 #. module: website
 #: model:ir.model.fields,help:website.field_website_visitor__partner_id
@@ -5864,7 +5873,7 @@ msgstr "Partner dell'ultimo utente che ha effettuato l'accesso."
 #. module: website
 #: model:ir.model.fields,help:website.field_website__partner_id
 msgid "Partner-related data of the user"
-msgstr "Dati utente collegati al partner"
+msgstr "Dati utente correlati al partner"
 
 #. module: website
 #: model:ir.actions.act_window,name:website.visitor_partner_action
@@ -6194,24 +6203,24 @@ msgstr "Normale"
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.website_pages_form_view
 msgid "Related Menu Items"
-msgstr "Voci di menù collegate"
+msgstr "Voci di menù correlate"
 
 #. module: website
 #: model:ir.model.fields,field_description:website.field_website_page__menu_ids
 msgid "Related Menus"
-msgstr "Menù collegati"
+msgstr "Menù correlati"
 
 #. module: website
 #: model:ir.model.fields,field_description:website.field_website_menu__page_id
 msgid "Related Page"
-msgstr "Pagina collegata"
+msgstr "Pagina correlata"
 
 #. module: website
 #. openerp-web
 #: code:addons/website/static/src/xml/website.seo.xml:0
 #, python-format
 msgid "Related keywords"
-msgstr "Parole chiave collegate"
+msgstr "Parole chiave correlate"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.cookie_policy
@@ -6502,6 +6511,11 @@ msgid ""
 "free and high quality photos, makes it possible for you to get the perfect "
 "picture, in just a few clicks."
 msgstr ""
+
+#. module: website
+#: model_terms:ir.ui.view,arch_db:website.website_search_box
+msgid "Search..."
+msgstr "Ricerca..."
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_features
@@ -7028,6 +7042,13 @@ msgid "Switch Theme"
 msgstr "Cambia tema"
 
 #. module: website
+#. openerp-web
+#: code:addons/website/static/src/xml/theme_preview.xml:0
+#, python-format
+msgid "TIP: Follow the"
+msgstr ""
+
+#. module: website
 #: model_terms:ir.ui.view,arch_db:website.user_navbar
 msgid "TRANSLATE"
 msgstr "TRADUCI"
@@ -7226,7 +7247,7 @@ msgstr "Un'applicazione è già in corso di installazione."
 #: code:addons/website/static/src/xml/website.seo.xml:0
 #, python-format
 msgid "The language of the keyword and related keywords."
-msgstr "La lingua della parola chiave e di quelle collegate."
+msgstr "La lingua della parola chiave e di quelle correlate."
 
 #. module: website
 #: model:ir.model.fields,help:website.field_website_snippet_filter__limit
@@ -7379,7 +7400,7 @@ msgstr "Terzo menù"
 #: model:ir.model.fields,help:website.field_res_config_settings__favicon
 #: model:ir.model.fields,help:website.field_website__favicon
 msgid "This field holds the image used to display a favicon on the website."
-msgstr "Questo campo contiene l'immagine usata come favicon dal sito web."
+msgstr "Campo che contiene l'immagine usata come favicon dal sito web."
 
 #. module: website
 #: model:ir.model.fields,help:website.field_website_page__arch_base
@@ -7401,7 +7422,7 @@ msgstr ""
 #. module: website
 #: model:ir.model.fields,help:website.field_website_page__arch_db
 msgid "This field stores the view arch."
-msgstr ""
+msgstr "Il campo memorizza l'architettura della vista."
 
 #. module: website
 #: model:ir.model.fields,help:website.field_website_page__arch_prev
@@ -8545,7 +8566,7 @@ msgstr "Riscritture per sito web"
 #. module: website
 #: model:ir.actions.server,name:website.ir_actions_server_website_google_analytics
 msgid "Website: Analytics"
-msgstr ""
+msgstr "Sito web: analitiche"
 
 #. module: website
 #: model:ir.actions.server,name:website.ir_actions_server_website_dashboard
@@ -8839,7 +8860,7 @@ msgstr "Account YouTube"
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.s_google_map_options
 msgid "Zoom"
-msgstr ""
+msgstr "Zoom"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.cookie_policy
@@ -9092,7 +9113,7 @@ msgstr "muro, griglia"
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets
 msgid "menu, pricing"
-msgstr "menù, prezzi"
+msgstr "menù, tariffazione"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.company_description_google_map
@@ -9163,7 +9184,7 @@ msgstr "segnaposto"
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets
 msgid "pricing"
-msgstr "prezzi"
+msgstr "tariffazione"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets
@@ -9187,7 +9208,7 @@ msgstr ""
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets
 msgid "statistics, stats, KPI"
-msgstr "dati, statistica, KPI"
+msgstr "dati, statistiche, ICP"
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets
@@ -9211,6 +9232,13 @@ msgstr "theme.ir.ui.view"
 #, python-format
 msgid "this page"
 msgstr "questa"
+
+#. module: website
+#. openerp-web
+#: code:addons/website/static/src/xml/theme_preview.xml:0
+#, python-format
+msgid "to build the perfect page in 5 steps."
+msgstr ""
 
 #. module: website
 #: model_terms:ir.ui.view,arch_db:website.snippets

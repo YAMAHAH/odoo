@@ -107,8 +107,16 @@ class AccountPartialReconcile(models.Model):
         if not self:
             return True
 
-        # Reverse all exchange moves at once.
+        # Retrieve the matching number to unlink.
+        full_to_unlink = self.full_reconcile_id
+
+        # Retrieve the CABA entries to reverse.
         moves_to_reverse = self.env['account.move'].search([('tax_cash_basis_rec_id', 'in', self.ids)])
+
+        # Unlink partials before doing anything else to avoid 'Record has already been deleted' due to the recursion.
+        res = super().unlink()
+
+        # Reverse CABA entries.
         today = fields.Date.context_today(self)
         default_values_list = [{
             'date': move.date if move.date > (move.company_id.period_lock_date or date.min) else today,
@@ -116,10 +124,9 @@ class AccountPartialReconcile(models.Model):
         } for move in moves_to_reverse]
         moves_to_reverse._reverse_moves(default_values_list, cancel=True)
 
-        # Unlink partials then the full in this order to avoid a recursive call to the same partials.
-        full_to_unlink = self.full_reconcile_id
-        res = super().unlink()
+        # Remove the matching numbers.
         full_to_unlink.unlink()
+
         return res
 
     # -------------------------------------------------------------------------
@@ -167,11 +174,15 @@ class AccountPartialReconcile(models.Model):
                     partial_amount_currency += partial.debit_amount_currency
                     rate_amount -= partial.credit_move_id.balance
                     rate_amount_currency -= partial.credit_move_id.amount_currency
+                    source_line = partial.debit_move_id
+                    counterpart_line = partial.credit_move_id
                 if partial.credit_move_id.move_id == move:
                     partial_amount += partial.amount
                     partial_amount_currency += partial.credit_amount_currency
                     rate_amount += partial.debit_move_id.balance
                     rate_amount_currency += partial.debit_move_id.amount_currency
+                    source_line = partial.credit_move_id
+                    counterpart_line = partial.debit_move_id
 
                 if move_values['currency'] == move.company_id.currency_id:
                     # Percentage made on company's currency.
@@ -180,7 +191,16 @@ class AccountPartialReconcile(models.Model):
                     # Percentage made on foreign currency.
                     percentage = partial_amount_currency / move_values['total_amount_currency']
 
-                if rate_amount:
+                if source_line.currency_id != counterpart_line.currency_id:
+                    # When the invoice and the payment are not sharing the same foreign currency, the rate is computed
+                    # on-the-fly using the payment date.
+                    payment_rate = self.env['res.currency']._get_conversion_rate(
+                        counterpart_line.company_currency_id,
+                        source_line.currency_id,
+                        counterpart_line.company_id,
+                        counterpart_line.date,
+                    )
+                elif rate_amount:
                     payment_rate = rate_amount_currency / rate_amount
                 else:
                     payment_rate = 0.0
@@ -361,6 +381,7 @@ class AccountPartialReconcile(models.Model):
         :param pending_cash_basis_lines:    The previously generated lines during this reconciliation but not yet created.
         :param partial_lines_to_create:     The generated lines for the current and last partial making the move fully paid.
         '''
+        # DEPRECATED: TO BE REMOVED IN MASTER
         residual_amount_per_group = {}
         move = move_values['move']
 
@@ -458,9 +479,8 @@ class AccountPartialReconcile(models.Model):
             move = move_values['move']
             pending_cash_basis_lines = []
 
-            for i, partial_values in enumerate(move_values['partials']):
+            for partial_values in move_values['partials']:
                 partial = partial_values['partial']
-                is_last_partial = i == len(move_values['partials']) - 1
 
                 # Init the journal entry.
                 move_vals = {
@@ -529,19 +549,6 @@ class AccountPartialReconcile(models.Model):
                             partial_lines_to_create[grouping_key] = {
                                 'vals': cb_base_line_vals,
                             }
-
-                # ==========================================================================
-                # Ensure the full coverage by replacing the balance of the journal items
-                # created by the last partial.
-                # ==========================================================================
-
-                if move_values['is_fully_paid'] and is_last_partial:
-                    self._fix_cash_basis_full_balance_coverage(
-                        move_values,
-                        partial_values,
-                        pending_cash_basis_lines,
-                        partial_lines_to_create,
-                    )
 
                 # ==========================================================================
                 # Create the counterpart journal items.

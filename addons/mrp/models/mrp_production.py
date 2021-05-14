@@ -86,7 +86,13 @@ class MrpProduction(models.Model):
 
     product_id = fields.Many2one(
         'product.product', 'Product',
-        domain="[('id', 'in', allowed_product_ids)]",
+        domain="""[
+            ('type', 'in', ['product', 'consu']),
+            '|',
+                ('company_id', '=', False),
+                ('company_id', '=', company_id)
+        ]
+        """,
         readonly=True, required=True, check_company=True,
         states={'draft': [('readonly', False)]})
     product_tracking = fields.Selection(related='product_id.tracking')
@@ -706,6 +712,8 @@ class MrpProduction(models.Model):
     def _onchange_workorder_ids(self):
         if self.bom_id:
             self._create_workorder()
+        else:
+            self.workorder_ids = False
 
     def write(self, vals):
         if 'workorder_ids' in self:
@@ -1112,8 +1120,9 @@ class MrpProduction(models.Model):
     def button_plan(self):
         """ Create work orders. And probably do stuff, like things. """
         orders_to_plan = self.filtered(lambda order: not order.is_planned)
+        orders_to_confirm = orders_to_plan.filtered(lambda mo: mo.state == 'draft')
+        orders_to_confirm.action_confirm()
         for order in orders_to_plan:
-            (order.move_raw_ids | order.move_finished_ids).filtered(lambda m: m.state == 'draft')._action_confirm()
             order._plan_workorders()
         return True
 
@@ -1651,7 +1660,8 @@ class MrpProduction(models.Model):
             'res_model': 'mrp.unbuild',
             'view_id': self.env.ref('mrp.mrp_unbuild_form_view_simplified').id,
             'type': 'ir.actions.act_window',
-            'context': {'default_mo_id': self.id,
+            'context': {'default_product_id': self.product_id.id,
+                        'default_mo_id': self.id,
                         'default_company_id': self.company_id.id,
                         'default_location_id': self.location_dest_id.id,
                         'default_location_dest_id': self.location_src_id.id,

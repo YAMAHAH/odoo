@@ -31,7 +31,7 @@ class StockMove(models.Model):
         price_unit = self.price_unit
         # If the move is a return, use the original move's price unit.
         if self.origin_returned_move_id and self.origin_returned_move_id.sudo().stock_valuation_layer_ids:
-            price_unit = self.origin_returned_move_id.stock_valuation_layer_ids[-1].unit_cost
+            price_unit = self.origin_returned_move_id.sudo().stock_valuation_layer_ids[-1].unit_cost
         return not self.company_id.currency_id.is_zero(price_unit) and price_unit or self.product_id.standard_price
 
     @api.model
@@ -179,6 +179,7 @@ class StockMove(models.Model):
             svl_vals.update(move._prepare_common_svl_vals())
             if forced_quantity:
                 svl_vals['description'] = 'Correction of %s (modification of past move)' % move.picking_id.name or move.name
+            svl_vals['description'] += svl_vals.pop('rounding_adjustment', '')
             svl_vals_list.append(svl_vals)
         return self.env['stock.valuation.layer'].sudo().create(svl_vals_list)
 

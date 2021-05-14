@@ -16,9 +16,12 @@ class AccountMove(models.Model):
         for line in line_ids:
             try:
                 line.sale_line_ids.tax_id = line.tax_ids
-                #To keep positive amount on the sale order and to have the right price for the invoice
-                #We need the - before our untaxed_amount_to_invoice
-                line.sale_line_ids.price_unit = -line.sale_line_ids.untaxed_amount_to_invoice
+                if all(line.tax_ids.mapped('price_include')):
+                    line.sale_line_ids.price_unit = line.price_unit
+                else:
+                    #To keep positive amount on the sale order and to have the right price for the invoice
+                    #We need the - before our untaxed_amount_to_invoice
+                    line.sale_line_ids.price_unit = -line.sale_line_ids.untaxed_amount_to_invoice
             except UserError:
                 # a UserError here means the SO was locked, which prevents changing the taxes
                 # just ignore the error - this is a nice to have feature and should not be blocking
@@ -69,6 +72,8 @@ class AccountMoveLine(models.Model):
             For Vendor Bill flow, if the product has a 'erinvoice policy' and is a cost, then we will find the SO on which reinvoice the AAL
         """
         self.ensure_one()
+        if self.sale_line_ids:
+            return False
         uom_precision_digits = self.env['decimal.precision'].precision_get('Product Unit of Measure')
         return float_compare(self.credit or 0.0, self.debit or 0.0, precision_digits=uom_precision_digits) != 1 and self.product_id.expense_policy not in [False, 'no']
 

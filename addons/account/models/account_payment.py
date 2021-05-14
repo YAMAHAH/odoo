@@ -272,7 +272,7 @@ class AccountPayment(models.Model):
     # COMPUTE METHODS
     # -------------------------------------------------------------------------
 
-    @api.depends('move_id.line_ids.amount_residual', 'move_id.line_ids.amount_residual_currency')
+    @api.depends('move_id.line_ids.amount_residual', 'move_id.line_ids.amount_residual_currency', 'move_id.line_ids.account_id')
     def _compute_reconciliation_status(self):
         ''' Compute the field indicating if the payments are already reconciled with something.
         This field is used for display purpose (e.g. display the 'reconcile' button redirecting to the reconciliation
@@ -344,7 +344,9 @@ class AccountPayment(models.Model):
                 available_payment_methods = pay.journal_id.outbound_payment_method_ids
 
             # Select the first available one by default.
-            if available_payment_methods:
+            if pay.payment_method_id in available_payment_methods:
+                pay.payment_method_id = pay.payment_method_id
+            elif available_payment_methods:
                 pay.payment_method_id = available_payment_methods[0]._origin
             else:
                 pay.payment_method_id = False
@@ -678,12 +680,15 @@ class AccountPayment(models.Model):
                 })
                 payment_vals_to_write.update({
                     'amount': abs(liquidity_amount),
-                    'payment_type': 'inbound' if liquidity_amount > 0.0 else 'outbound',
                     'partner_type': partner_type,
                     'currency_id': liquidity_lines.currency_id.id,
                     'destination_account_id': counterpart_lines.account_id.id,
                     'partner_id': liquidity_lines.partner_id.id,
                 })
+                if liquidity_amount > 0.0:
+                    payment_vals_to_write.update({'payment_type': 'inbound'})
+                elif liquidity_amount < 0.0:
+                    payment_vals_to_write.update({'payment_type': 'outbound'})
 
             move.write(move._cleanup_write_orm_values(move, move_vals_to_write))
             pay.write(move._cleanup_write_orm_values(pay, payment_vals_to_write))
@@ -711,9 +716,9 @@ class AccountPayment(models.Model):
                 writeoff_amount = sum(writeoff_lines.mapped('amount_currency'))
                 counterpart_amount = counterpart_lines['amount_currency']
                 if writeoff_amount > 0.0 and counterpart_amount > 0.0:
-                    sign = 1
-                else:
                     sign = -1
+                else:
+                    sign = 1
 
                 write_off_line_vals = {
                     'name': writeoff_lines[0].name,

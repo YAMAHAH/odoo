@@ -138,6 +138,8 @@ class SaleOrder(models.Model):
             """, (list(value),))
             so_ids = self.env.cr.fetchone()[0] or []
             return [('id', 'in', so_ids)]
+        if operator == '=' and not value:
+            return [('order_line.invoice_lines', '=', False)]
         return ['&', ('order_line.invoice_lines.move_id.move_type', 'in', ('out_invoice', 'out_refund')), ('order_line.invoice_lines.move_id', operator, value)]
 
     name = fields.Char(string='Order Reference', required=True, copy=False, readonly=True, states={'draft': [('readonly', False)]}, index=True, default=lambda self: _('New'))
@@ -701,7 +703,7 @@ Reason(s) of this behavior could be:
                 )
                 invoice_item_sequence += 1
 
-            invoice_vals['invoice_line_ids'] = invoice_line_vals
+            invoice_vals['invoice_line_ids'] += invoice_line_vals
             invoice_vals_list.append(invoice_vals)
 
         if not invoice_vals_list:
@@ -1082,19 +1084,6 @@ Reason(s) of this behavior could be:
     def _get_report_base_filename(self):
         self.ensure_one()
         return '%s %s' % (self.type_name, self.name)
-
-    def _get_share_url(self, redirect=False, signup_partner=False, pid=None):
-        """Override for sales order.
-
-        If the SO is in a state where an action is required from the partner,
-        return the URL with a login token. Otherwise, return the URL with a
-        generic access token (no login).
-        """
-        self.ensure_one()
-        if self.state not in ['sale', 'done']:
-            auth_param = url_encode(self.partner_id.signup_get_auth_param()[self.partner_id.id])
-            return self.get_portal_url(query_string='&%s' % auth_param)
-        return super(SaleOrder, self)._get_share_url(redirect, signup_partner, pid)
 
     def _get_payment_type(self, tokenize=False):
         self.ensure_one()
@@ -1551,18 +1540,16 @@ class SaleOrderLine(models.Model):
                 # amount and not zero. Since we compute untaxed amount, we can use directly the price
                 # reduce (to include discount) without using `compute_all()` method on taxes.
                 price_subtotal = 0.0
-                if line.product_id.invoice_policy == 'delivery':
-                    price_subtotal = line.price_reduce * line.qty_delivered
-                else:
-                    price_subtotal = line.price_reduce * line.product_uom_qty
+                umo_qty_to_consider = line.qty_delivered if line.product_id.invoice_policy == 'delivery' else line.product_uom_qty
+                price_subtotal = line.price_reduce * umo_qty_to_consider
                 if len(line.tax_id.filtered(lambda tax: tax.price_include)) > 0:
                     # As included taxes are not excluded from the computed subtotal, `compute_all()` method
                     # has to be called to retrieve the subtotal without them.
                     # `price_reduce_taxexcl` cannot be used as it is computed from `price_subtotal` field. (see upper Note)
                     price_subtotal = line.tax_id.compute_all(
-                        price_subtotal,
+                        line.price_reduce,
                         currency=line.order_id.currency_id,
-                        quantity=line.product_uom_qty,
+                        quantity=umo_qty_to_consider,
                         product=line.product_id,
                         partner=line.order_id.partner_shipping_id)['total_excluded']
 
@@ -1661,6 +1648,43 @@ class SaleOrderLine(models.Model):
         # negative discounts (= surcharge) are included in the display price
         return max(base_price, final_price)
 
+    def _get_default_price_unit_from_product(self, product):
+        self.ensure_one()
+
+        currency = self.order_id.currency_id
+        fiscal_position = self.order_id.fiscal_position_id or self.order_id.partner_id.property_account_position_id
+        product_taxes = self.product_id.taxes_id.filtered(lambda r: r.company_id == self.order_id.company_id)
+        product_taxes_after_fp = fiscal_position.map_tax(product_taxes, partner=self.order_id.partner_id)
+        price_unit = self._get_display_price(product)
+
+        if set(product_taxes.ids) != set(product_taxes_after_fp.ids):
+            flattened_taxes = product_taxes._origin.flatten_taxes_hierarchy()
+            if any(tax.price_include for tax in flattened_taxes):
+                taxes_res = flattened_taxes.compute_all(
+                    price_unit,
+                    quantity=self.product_uom_qty,
+                    currency=currency,
+                    product=self.product_id,
+                    partner=self.order_id.partner_id,
+                )
+                price_unit = currency.round(taxes_res['total_excluded'])
+
+            flattened_taxes = product_taxes_after_fp._origin.flatten_taxes_hierarchy()
+            if any(tax.price_include for tax in flattened_taxes):
+                taxes_res = flattened_taxes.compute_all(
+                    price_unit,
+                    quantity=self.product_uom_qty,
+                    currency=currency,
+                    product=self.product_id,
+                    partner=self.order_id.partner_id,
+                    handle_price_include=False,
+                )
+                for tax_res in taxes_res['taxes']:
+                    tax = self.env['account.tax'].browse(tax_res['id'])
+                    if tax.price_include:
+                        price_unit += tax_res['amount']
+        return price_unit
+
     @api.onchange('product_id')
     def product_id_change(self):
         if not self.product_id:
@@ -1689,13 +1713,13 @@ class SaleOrderLine(models.Model):
             pricelist=self.order_id.pricelist_id.id,
             uom=self.product_uom.id
         )
-
         vals.update(name=self.get_sale_order_line_multiline_description_sale(product))
 
         self._compute_tax_id()
 
         if self.order_id.pricelist_id and self.order_id.partner_id:
-            vals['price_unit'] = self.env['account.tax']._fix_tax_included_price_company(self._get_display_price(product), product.taxes_id, self.tax_id, self.company_id)
+            vals['price_unit'] = self._get_default_price_unit_from_product(product)
+
         self.update(vals)
 
         title = False
@@ -1728,7 +1752,7 @@ class SaleOrderLine(models.Model):
                 uom=self.product_uom.id,
                 fiscal_position=self.env.context.get('fiscal_position')
             )
-            self.price_unit = self.env['account.tax']._fix_tax_included_price_company(self._get_display_price(product), product.taxes_id, self.tax_id, self.company_id)
+            self.price_unit = self._get_default_price_unit_from_product(product)
 
     def name_get(self):
         result = []

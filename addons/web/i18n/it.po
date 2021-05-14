@@ -15,14 +15,14 @@
 # Massimo Bianchi <bianchi.massimo@gmail.com>, 2020
 # Paolo Valier, 2020
 # Manuela Feliciani <mfeliciani@alice.it>, 2020
-# Léonie Bouchat <lbo@odoo.com>, 2020
+# Léonie Bouchat <lbo@odoo.com>, 2021
 # Sergio Zanchetta <primes2h@gmail.com>, 2021
 # 
 msgid ""
 msgstr ""
 "Project-Id-Version: Odoo Server 14.0\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-01-25 13:06+0000\n"
+"POT-Creation-Date: 2021-02-25 10:30+0000\n"
 "PO-Revision-Date: 2020-09-07 08:19+0000\n"
 "Last-Translator: Sergio Zanchetta <primes2h@gmail.com>, 2021\n"
 "Language-Team: Italian (https://www.transifex.com/odoo/teams/41243/it/)\n"
@@ -467,7 +467,7 @@ msgstr "ID azione:"
 #. module: web
 #: model:ir.model,name:web.model_ir_actions_act_window_view
 msgid "Action Window View"
-msgstr "Vista finestra azione"
+msgstr "Azione visualizzazione finestra"
 
 #. module: web
 #. openerp-web
@@ -2146,7 +2146,7 @@ msgstr "Immagine"
 #: code:addons/web/static/src/js/fields/basic_fields.js:0
 #, python-format
 msgid "In %s days"
-msgstr "Fra %s giorni"
+msgstr "Tra %s giorni"
 
 #. module: web
 #. openerp-web
@@ -2634,7 +2634,7 @@ msgstr "Nuovo"
 #. openerp-web
 #: code:addons/web/static/src/js/fields/relational_fields.js:0
 #, python-format
-msgid "New ${this.name}"
+msgid "New %s"
 msgstr ""
 
 #. module: web
@@ -2947,6 +2947,13 @@ msgstr "Solo tu"
 #. openerp-web
 #: code:addons/web/static/src/xml/debug.xml:0
 #, python-format
+msgid "Open Developer Tools"
+msgstr "Apre gli strumenti per sviluppatori"
+
+#. module: web
+#. openerp-web
+#: code:addons/web/static/src/xml/debug.xml:0
+#, python-format
 msgid "Open Developer Tools#{widget.debug_mode_help}"
 msgstr ""
 
@@ -2995,6 +3002,13 @@ msgstr "Apri in vista elenco"
 #, python-format
 msgid "Open: "
 msgstr "Apertura - "
+
+#. module: web
+#. openerp-web
+#: code:addons/web/static/src/js/views/list/list_renderer.js:0
+#, python-format
+msgid "Optional columns"
+msgstr ""
 
 #. module: web
 #. openerp-web
@@ -3174,7 +3188,7 @@ msgstr "Selezionare i campi da salvare nell'elenco di esportazione..."
 #: code:addons/web/static/src/xml/base.xml:0
 #, python-format
 msgid "Please update translations of :"
-msgstr "Aggiornare le traduzioni di:"
+msgstr "Aggiornare la traduzione di"
 
 #. module: web
 #. openerp-web
@@ -4039,8 +4053,8 @@ msgid ""
 "The type of the field '%s' must be a many2many field with a relation to "
 "'ir.attachment' model."
 msgstr ""
-"Il tipo del campo \"%s\" deve essere: \"molti a molti\" con una relazione al"
-" modello \"ir.attachment\"."
+"La tipologia per il campo \"%s\" deve essere una relazione molti a molti con"
+" il modello \"ir.attachment\"."
 
 #. module: web
 #: code:addons/web/controllers/main.py:0
@@ -4085,14 +4099,14 @@ msgstr "Questa data è futura, assicurarsi che ciò sia previsto."
 #: code:addons/web/static/src/js/widgets/domain_selector.js:0
 #, python-format
 msgid "This domain is not supported."
-msgstr "Questo dominio non è supportato."
+msgstr "Il dominio non è supportato."
 
 #. module: web
 #. openerp-web
 #: code:addons/web/static/src/xml/name_and_signature.xml:0
 #, python-format
 msgid "This file is invalid. Please select an image."
-msgstr "Questo file non è valido, selezionare un'immagine."
+msgstr "Il file non è valido, selezionare un'immagine."
 
 #. module: web
 #. openerp-web
@@ -4100,8 +4114,7 @@ msgstr "Questo file non è valido, selezionare un'immagine."
 #, python-format
 msgid ""
 "This filter is global and will be removed for everybody if you continue."
-msgstr ""
-"Questo filtro è globale. Proseguendo, verrà rimosso per tutti gli utenti."
+msgstr "Il filtro è globale. Proseguendo, verrà rimosso per tutti gli utenti."
 
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.preview_externalreport
@@ -4111,15 +4124,14 @@ msgstr "Esempio di documento esterno."
 #. module: web
 #: model_terms:ir.ui.view,arch_db:web.preview_internalreport
 msgid "This is a sample of an internal report."
-msgstr "Esempio di documento esterno."
+msgstr "Esempio di documento interno."
 
 #. module: web
 #. openerp-web
 #: code:addons/web/static/src/xml/base.xml:0
 #, python-format
 msgid "This update will only consider the records of the current page."
-msgstr ""
-"Questo aggiornamento terrà conto solo dei record della pagina corrente."
+msgstr "L'aggiornamento terrà conto solo dei record della pagina corrente."
 
 #. module: web
 #. openerp-web
@@ -4466,6 +4478,13 @@ msgstr "I valori impostati qui sono specifici per azienda."
 #, python-format
 msgid "Variation"
 msgstr ""
+
+#. module: web
+#. openerp-web
+#: code:addons/web/static/src/xml/base.xml:0
+#, python-format
+msgid "View %s"
+msgstr "Vedi %s"
 
 #. module: web
 #. openerp-web
@@ -5064,13 +5083,6 @@ msgstr "oppure"
 
 #. module: web
 #. openerp-web
-#: code:addons/web/static/src/xml/colorpicker.xml:0
-#, python-format
-msgid "p-0 border-0 text-center text-monospace bg-transparent text-white"
-msgstr "p-0 border-0 text-center text-monospace bg-transparent text-white"
-
-#. module: web
-#. openerp-web
 #: code:addons/web/static/src/js/widgets/domain_selector.js:0
 #, python-format
 msgid "parent of"
@@ -5124,7 +5136,7 @@ msgstr "record selezionati,"
 #: code:addons/web/static/src/xml/base.xml:0
 #, python-format
 msgid "set"
-msgstr ""
+msgstr "impostato"
 
 #. module: web
 #. openerp-web
